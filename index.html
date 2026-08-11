@@ -248,7 +248,7 @@
     let datosCarreras = {};
 
     function inicializar() {
-        if (DATABASE_URL.includes("AQUÍ_VA_TU_ENLACE")) {
+        if (DATABASE_URL.includes("https://apuestas-carreras-default-rtdb.firebaseio.com/")) {
             console.log("Modo local activo. Añade tu URL de Firebase para activar tiempo real.");
             cargarEstructuraBase();
             render();
