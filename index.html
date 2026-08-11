@@ -248,27 +248,23 @@
     let datosCarreras = {};
 
     function inicializar() {
-        if (DATABASE_URL.includes("https://apuestas-carreras-default-rtdb.firebaseio.com")) {
-            console.log("Modo local activo. Añade tu URL de Firebase para activar tiempo real.");
-            cargarEstructuraBase();
-            render();
-            return;
-        }
-        conectarFirebase(/);
-    }
+    cargarEstructuraBase();
+    conectarFirebase();
+}
 
-    function cargarEstructuraBase() {
-        if (!datosCarreras[carreraActual]) {
+     function cargarEstructuraBase() {
+         if (!datosCarreras[carreraActual]) {
             datosCarreras[carreraActual] = {
                 pilotos: ["Piloto 1", "Piloto 2", "Piloto 3", "Piloto 4"],
                 apuestas: {},
-                ganador: ""
-            };
-        }
+                  ganador: ""
+        };
     }
+    render();
+}
 
-    function conectarFirebase() {
-        const url = `${DATABASE_URL}/carreras.json`;
+function conectarFirebase() {
+    const url = DATABASE_URL + "carreras.json";
         
         // Polling cada 1.5 segundos para sincronizar todos los ordenadores
         setInterval(() => {
