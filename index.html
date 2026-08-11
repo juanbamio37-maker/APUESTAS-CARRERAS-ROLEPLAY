@@ -242,19 +242,19 @@
 
 <script>
     // LÍNEA 193: DIRECCIÓN DE TU BASE DE DATOS DE FIREBASE
-    const DATABASE_URL = "https://apuestas-carreras-default-rtdb.firebaseio.com/";
+    const DATABASE_URL = "https://apuestas-carreras-default-rtdb.firebaseio.com";
 
     let carreraActual = "carrera_1";
     let datosCarreras = {};
 
     function inicializar() {
-        if (DATABASE_URL.includes("https://apuestas-carreras-default-rtdb.firebaseio.com/")) {
+        if (DATABASE_URL.includes("https://apuestas-carreras-default-rtdb.firebaseio.com")) {
             console.log("Modo local activo. Añade tu URL de Firebase para activar tiempo real.");
             cargarEstructuraBase();
             render();
             return;
         }
-        conectarFirebase(https://apuestas-carreras-default-rtdb.firebaseio.com/);
+        conectarFirebase(/);
     }
 
     function cargarEstructuraBase() {
