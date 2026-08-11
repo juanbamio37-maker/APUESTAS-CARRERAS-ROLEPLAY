@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Apuestas Multicarrera en Tiempo Real</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --border-color: #e2e8f0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 { margin: 0; font-size: 24px; }
+        .setup-section {
+            background-color: #feebc8;
+            border: 2px dashed #dd6b20;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .code-input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        @media(max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+        .card h2 { margin-top: 0; font-size: 18px; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #2980b9; }
+        button.btn-success { background-color: var(--success-color); }
+        button.btn-success:hover { background-color: #27ae60; }
+        .pill-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+        .pill {
+            background-color: #edf2f7;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid #cbd5e0;
+        }
+        .pill.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background-color: #f8fafc; font-weight: 600; }
+        .totales-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .total-card {
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .total-card .val { font-size: 20px; font-weight: bold; color: var(--primary-color); margin-top: 5px; }
+        .total-card.casa .val { color: var(--accent-color); }
+        .total-card.neto .val { color: var(--success-color); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🏎️ Control de Apuestas - Carreras y Pilotos en Vivo</h1>
+        <p>Sincronizado en tiempo real entre múltiples ordenadores</p>
+    </header>
+
+    <!-- INSTRUCCIÓN DE CONFIGURACIÓN -->
+    <div class="setup-section">
+        ⚠️ CONFIGURACIÓN INICIAL DEL BLOC DE NOTAS:
+        <br><span style="font-weight:normal;">Asegúrate de cambiar la URL de Firebase en la línea 193 del código antes de subirlo a Internet.</span>
+    </div>
+
+    <!-- SELECCIÓN DE CARRERA Y PILOTOS -->
+    <div class="card" style="margin-bottom: 20px;">
+        <h2>🏁 Selección de Carrera y Configuración de Pilotos</h2>
+        <div class="grid" style="margin-bottom: 0; grid-template-columns: 1fr 1fr;">
+            <div class="form-group">
+                <label>Seleccionar Carrera:</label>
+                <div class="pill-container" id="carreras-lista">
+                    <!-- Se genera dinámicamente -->
+                </div>
+                <button type="button" style="width: auto; padding: 5px 10px; font-size: 12px;" onclick="crearNuevaCarrera()">+ Nueva Carrera</button>
+            </div>
+            <div>
+                <div class="form-group">
+                    <label>Número de Pilotos/Coches participantes:</label>
+                    <input type="number" id="num-pilotos" value="4" min="2" max="20" onchange="actualizarCamposPilotos()">
+                </div>
+                <div id="lista-nombres-pilotos" class="pill-container">
+                    <!-- Inputs o info de pilotos -->
+                </div>
+                <button type="button" class="btn-success" style="width: auto; padding: 5px 15px; font-size: 13px;" onclick="guardarConfiguracionPilotos()">⚙️ Guardar Configuración de Pilotos</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- REGISTRO DE APUESTAS -->
+        <div class="card">
+            <h2>💰 Registrar Nueva Apuesta</h2>
+            <form id="apuesta-form" onsubmit="registrarApuesta(event)">
+                <div class="form-group">
+                    <label>Nombre del Apostante:</label>
+                    <input type="text" id="apostante-nombre" placeholder="Ej. Juan Carlos" required>
+                </div>
+                <div class="form-group">
+                    <label>Seleccionar Piloto/Coche:</label>
+                    <select id="apostante-piloto" required>
+                        <!-- Dinámico -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Dinero a Apostar ($):</label>
+                    <input type="number" id="apostante-monto" min="1" placeholder="Ej. 50" required>
+                </div>
+                <button type="submit">Añadir Apuesta</button>
+            </form>
+        </div>
+
+        <!-- CONTROL DE RESULTADOS -->
+        <div class="card">
+            <h2>🏆 Definir Ganador de la Carrera</h2>
+            <div class="form-group">
+                <label>¿Qué piloto/coche ganó la carrera?</label>
+                <select id="coche-ganador-select" onchange="cambiarGanador(this.value)">
+                    <option value="">-- Carrera en curso (Sin ganador) --</option>
+                    <!-- Dinámico -->
+                </select>
+            </div>
+            <div class="totales-box">
+                <div class="total-card">
+                    <div>Bote Total</div>
+                    <div class="val" id="txt-bote-total">$0.00</div>
+                </div>
+                <div class="total-card casa">
+                    <div>Casa (10%)</div>
+                    <div class="val" id="txt-bote-casa">$0.00</div>
+                </div>
+                <div class="total-card neto">
+                    <div>Bote Neto</div>
+                    <div class="val" id="txt-bote-neto">$0.00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLA DE APUESTAS Y PAGOS -->
+    <div class="card">
+        <h2>📋 Panel General de Apuestas y Reparto de Premios</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Apostante</th>
+                        <th>Piloto/Coche</th>
+                        <th>Cantidad Jugada</th>
+                        <th>¿Acertó?</th>
+                        <th>% del Premio</th>
+                        <th>Premio a Pagar</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-cuerpo">
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #94a3b8;">No hay apuestas registradas en esta carrera.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // LÍNEA 193: DIRECCIÓN DE TU BASE DE DATOS DE FIREBASE
+    const DATABASE_URL = "https://apuestas-carreras-default-rtdb.firebaseio.com/";
+
+    let carreraActual = "carrera_1";
+    let datosCarreras = {};
+
+    function inicializar() {
+        if (DATABASE_URL.includes("AQUÍ_VA_TU_ENLACE")) {
+            console.log("Modo local activo. Añade tu URL de Firebase para activar tiempo real.");
+            cargarEstructuraBase();
+            render();
+            return;
+        }
+        conectarFirebase();
+    }
+
+    function cargarEstructuraBase() {
+        if (!datosCarreras[carreraActual]) {
+            datosCarreras[carreraActual] = {
+                pilotos: ["Piloto 1", "Piloto 2", "Piloto 3", "Piloto 4"],
+                apuestas: {},
+                ganador: ""
+            };
+        }
+    }
+
+    function conectarFirebase() {
+        const url = `${DATABASE_URL}/carreras.json`;
+        
+        // Polling cada 1.5 segundos para sincronizar todos los ordenadores
+        setInterval(() => {
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if (data) {
+                        datosCarreras = data;
+                        if (!datosCarreras[carreraActual]) cargarEstructuraBase();
+                        render();
+                    } else {
+                        cargarEstructuraBase();
+                        render();
+                    }
+                }).catch(err => console.error("Error cargando base de datos:", err));
+        }, 1500);
+    }
+
+    function enviarDatosACloud() {
+        if (DATABASE_URL.includes("AQUÍ_VA_TU_ENLACE")) {
+            render();
+            return;
+        }
+        fetch(`${DATABASE_URL}/carreras.json`, {
+            method: 'PUT',
+            body: JSON.stringify(datosCarreras),
+            headers: { 'Content-Type': 'application/json' }
+        }).then(() => render());
+    }
+
+    function actualizarCamposPilotos() {
+        const num = parseInt(document.getElementById('num-pilotos').value) || 2;
+        const container = document.getElementById('lista-nombres-pilotos');
+        let html = '';
+        const listaActual = datosCarreras[carreraActual]?.pilotos || [];
+        
+        for(let i=0; i<num; i++) {
+            const val = listaActual[i] || `Piloto ${i+1}`;
+            html += `<input type="text" class="pill" style="width:110px; text-align:center;" id="p-name-${i}" value="${val}">`;
+        }
+        container.innerHTML = html;
+    }
+
+    function guardarConfiguracionPilotos() {
+        const num = parseInt(document.getElementById('num-pilotos').value) || 2;
+        let nuevosPilotos = [];
+        for(let i=0; i<num; i++) {
+            const inputVal = document.getElementById(`p-name-${i}`).value.trim();
+            nuevosPilotos.push(inputVal || `Piloto ${i+1}`);
+        }
+        datosCarreras[carreraActual].pilotos = nuevosPilotos;
+        enviarDatosACloud();
+    }
+
+    function crearNuevaCarrera() {
+        const totalCarreras = Object.keys(datosCarreras).length;
+        const nuevoId = `carrera_${totalCarreras + 1}`;
+        datosCarreras[nuevoId] = {
+            pilotos: ["Piloto 1", "Piloto 2", "Piloto 3", "Piloto 4"],
+            apuestas: {},
+            ganador: ""
+        };
+        carreraActual = nuevoId;
+        enviarDatosACloud();
+    }
+
+    function cambiarCarrera(id) {
+        carreraActual = id;
+        if(!datosCarreras[carreraActual]) cargarEstructuraBase();
+        render();
+    }
+
+    function registrarApuesta(e) {
+        e.preventDefault();
+        const nombre = document.getElementById('apostante-nombre').value.trim();
+        const piloto = document.getElementById('apostante-piloto').value;
+        const monto = parseFloat(document.getElementById('apostante-monto').value);
+
+        if(!nombre || !piloto || isNaN(monto)) return;
+
+        const idApuesta = 'apuesta_' + Date.now();
+        if(!datosCarreras[carreraActual].apuestas) datosCarreras[carreraActual].apuestas = {};
+        
+        datosCarreras[carreraActual].apuestas[idApuesta] = { nombre, piloto, monto };
+        
+        document.getElementById('apuesta-form').reset();
+        enviarDatosACloud();
+    }
+
+    function cambiarGanador(val) {
+        datosCarreras[carreraActual].ganador = val;
+        enviarDatosACloud();
+    }
+
+    function render() {
+        const data = datosCarreras[carreraActual] || { pilotos:[], apuestas:{}, ganador:"" };
+        
+        // Renderizar pestañas carreras
+        const listCarrerasContainer = document.getElementById('carreras-lista');
+        let htmlCarreras = '';
+        Object.keys(datosCarreras).forEach(id => {
+            const numLabel = id.replace('carrera_', 'Carrera ');
+            const activeClass = id === carreraActual ? 'active' : '';
+            htmlCarreras += `<div class="pill ${activeClass}" onclick="cambiarCarrera('${id}')">${numLabel}</div>`;
+        });
+        listCarrerasContainer.innerHTML = htmlCarreras;
+
+        // Renderizar selectores de pilotos
+        const selectPiloto = document.getElementById('apostante-piloto');
+        const selectGanador = document.getElementById('coche-ganador-select');
+        
+        let htmlOptions = '<option value="" disabled selected>-- Elige un coche --</option>';
+        let htmlGanadorOptions = '<option value="">-- Carrera en curso (Sin ganador) --</option>';
+        
+        data.pilotos.forEach(p => {
+            htmlOptions += `<option value="${p}">${p}</option>`;
+            const sel = data.ganador === p ? 'selected' : '';
+            htmlGanadorOptions += `<option value="${p}" ${sel}>${p}</option>`;
+        });
+        selectPiloto.innerHTML = htmlOptions;
+        selectGanador.innerHTML = htmlGanadorOptions;
+
+        // Si no se han dibujado los campos de edición de pilotos para esta carrera, dibujarlos
+        if(!document.getElementById('p-name-0')) {
+            document.getElementById('num-pilotos').value = data.pilotos.length;
+            actualizarCamposPilotos();
+        }
+
+        // Cálculos matemáticos
+        const apuestas = data.apuestas ? Object.values(data.apuestas) : [];
+        let boteTotal = 0;
+        let totalApostadoGanador = 0;
+
+        apuestas.forEach(ap => {
+            boteTotal += ap.monto;
+            if (data.ganador && ap.piloto === data.ganador) {
+                totalApostadoGanador += ap.monto;
+            }
+        });
+
+        let boteCasa = boteTotal * 0.10;
+        let boteNeto = boteTotal * 0.90;
+
+        document.getElementById('txt-bote-total').innerText = `$${boteTotal.toFixed(2)}`;
+        document.getElementById('txt-bote-casa').innerText = `$${boteCasa.toFixed(2)}`;
+        document.getElementById('txt-bote-neto').innerText = `$${boteNeto.toFixed(2)}`;
+
+        // Renderizar tabla
+        const tbody = document.getElementById('tabla-cuerpo');
+        if(apuestas.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #94a3b8;">No hay apuestas registradas en esta carrera.</td></tr>`;
+            return;
+        }
+
+        let htmlTabla = '';
+        apuestas.forEach(ap => {
+            let acerto = "-";
+            let porcentaje = 0;
+            let premio = 0;
+
+            if (data.ganador) {
+                if (ap.piloto === data.ganador) {
+                    acerto = "🟢 SÍ";
+                    porcentaje = totalApostadoGanador > 0 ? (ap.monto / totalApostadoGanador) : 0;
+                    premio = porcentaje * boteNeto;
+                } else {
+                    acerto = "🔴 NO";
+                }
+            }
+
+            htmlTabla += `
+                <tr>
+                    <td><strong>${ap.nombre}</strong></td>
+                    <td>${ap.piloto}</td>
+                    <td>$${ap.monto.toFixed(2)}</td>
+                    <td>${acerto}</td>
+                    <td>${data.ganador && ap.piloto === data.ganador ? (porcentaje * 100).toFixed(1) + '%' : '-'}</td>
+                    <td><strong style="color: ${premio > 0 ? 'var(--success-color)' : 'inherit'}">${premio > 0 ? '$' + premio.toFixed(2) : '-'}</strong></td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = htmlTabla;
+    }
+
+    // Arrancar la app
+    window.onload = inicializar;
+</script>
+</body>
+</html>
