@@ -3,216 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Apuestas Compartido v3</title>
-    <style>
-        :root { --primary: #1e3a8a; --primary-hover: #1d4ed8; --success: #10b981; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        .header { background: var(--primary); color: white; padding: 20px; text-align: center; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
-        .card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h3 { margin-bottom: 15px; font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; color: var(--primary); }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
-        input, select, button { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.95rem; }
-        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-        button:hover { background: var(--primary-hover); }
-        button.btn-success { background: var(--success); }
-        .pilot-inputs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .pilot-inputs input { width: calc(50% - 4px); min-width: 120px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
-        th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-        th { background: #f1f5f9; font-weight: 600; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: bold; }
-        .badge-success { background: #d1fae5; color: #065f46; }
-        .badge-danger { background: #fee2e2; color: #991b1b; }
-        .flex-box { display: flex; gap: 10px; align-items: flex-end; }
-    </style>
+    <title>Sistema de Apuestas - Carreras Roleplay</title>
+    <!-- Tailwind CSS para diseño profesional -->
+    <script src="https://tailwindcss.com"></script>
+    <!-- FontAwesome para los iconos -->
+    <link rel="stylesheet" href="https://cloudflare.com">
 </head>
-<body>
-<div class="container">
-    <div class="header">
-        <h2>Control de Apuestas Compartido</h2>
-        <p>Sincronización en Tiempo Real Establecida</p>
-    </div>
+<body class="bg-gray-100 font-sans pb-12">
 
-    <!-- CONFIGURACIÓN DE CARRERA -->
-    <div class="card">
-        <h3>🏁 Selección de Carrera y Configuración de Pilotos</h3>
-        <div class="grid">
-            <div class="form-group">
-                <label>Seleccionar Carrera:</label>
-                <div class="flex-box">
-                    <select id="raceSelect" onchange="changeRace()"><option value="carrera_1">CARRERA 1</option></select>
-                    <button onclick="addRace()" style="width: auto; white-space: nowrap;">+ Nueva Carrera</button>
+    <!-- Barra Superior Decorativa -->
+    <div class="w-full h-4 bg-blue-800"></div>
+
+    <div class="max-w-5xl mx-auto px-4 mt-6">
+        
+        <!-- Bloque 1: Configuración de la Carrera y Pilotos -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+            <h2 class="font-bold text-gray-800 text-lg flex items-center gap-2 mb-4">
+                <i class="fa-solid fa-car text-blue-600"></i> Configuración de la Carrera y Pilotos
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre o ID de la Carrera:</label>
+                    <input type="text" id="nombreCarrera" value="Carrera 1" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 mb-3">
+                    
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Número de Pilotos participantes:</label>
+                    <input type="number" id="numPilotos" value="4" min="2" max="12" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div class="flex flex-col justify-between">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Vista previa de competidores:</label>
+                        <div id="contenedorPilotos" class="flex flex-wrap gap-2 mb-4">
+                            <!-- Se generan dinámicamente -->
+                        </div>
+                    </div>
+
+                    <button onclick="guardarConfiguracion()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2.5 rounded flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+                        <i class="fa-solid fa-square-check"></i> Fijar Competidores y Abrir Apuestas
+                    </button>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Número de Pilotos:</label>
-                <div class="flex-box">
-                    <input type="number" id="numPilots" value="4" min="2" max="20" onchange="generatePilotInputs()">
-                    <button onclick="generatePilotInputs()" style="width: auto;">Actualizar Cajas</button>
+        </div>
+
+        <!-- Bloques Centrales: Registro y Cierre -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            
+            <!-- Bloque 2: Registrar Nueva Apuesta -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h2 class="font-bold text-gray-800 text-lg flex items-center gap-2 mb-4">
+                    <i class="fa-solid fa-user-plus text-amber-500"></i> Registrar Nueva Apuesta
+                </h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre del Apostante:</label>
+                        <input type="text" id="nombreApostante" placeholder="Ej. Juan Carlos" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Seleccionar Piloto/Coche:</label>
+                        <select id="selectPiloto" class="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500">
+                            <option value="">-- Configura los pilotos primero --</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Dinero a Apostar ($):</label>
+                        <input type="number" id="dineroApostar" placeholder="Ej. 50" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <button onclick="registrarApuesta()" class="w-full bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold py-2.5 rounded transition-colors shadow-sm mt-2">
+                        Añadir Apuesta
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bloque 3: Definir Ganador y Estado de Caja -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between">
+                <div>
+                    <h2 class="font-bold text-gray-800 text-lg flex items-center gap-2 mb-4">
+                        <i class="fa-solid fa-flag-checkered text-red-500"></i> Definir Ganador de la Carrera
+                    </h2>
+                    
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">¿Qué piloto/coche ganó la carrera?</label>
+                    <select id="selectGanador" onchange="definirGanador()" class="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-500 mb-6">
+                        <option value="">-- Carrera en curso (Sin ganador) --</option>
+                    </select>
+                </div>
+
+                <!-- Tarjetas Contables -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-50 border border-gray-100 rounded-lg p-3 text-center">
+                        <span class="text-xs text-gray-500 block">Bote Total Bruto</span>
+                        <span id="boteTotal" class="text-xl font-bold text-blue-600">$0.00</span>
+                    </div>
+                    <div class="bg-slate-50 border border-gray-100 rounded-lg p-3 text-center">
+                        <span class="text-xs text-gray-500 block">Casa (10%)</span>
+                        <span id="boteCasa" class="text-xl font-bold text-red-500">$0.00</span>
+                    </div>
+                    <div class="bg-slate-50 border border-gray-100 rounded-lg p-3 text-center col-span-2">
+                        <span class="text-xs text-gray-500 block">Bote Neto para Premios</span>
+                        <span id="boteNeto" class="text-xl font-bold text-emerald-500">$0.00</span>
+                    </div>
                 </div>
             </div>
         </div>
-        <div id="pilotContainer" class="pilot-inputs"></div>
-        <button class="btn-success" onclick="savePilots()" style="margin-top: 15px;">💾 Guardar Configuración de Pilotos</button>
-    </div>
 
-    <div class="grid">
-        <!-- REGISTRO -->
-        <div class="card">
-            <h3>👤 Registrar Nueva Apuesta</h3>
-            <div class="form-group">
-                <label>Nombre del Apostante:</label>
-                <input type="text" id="apostanteName" placeholder="Ej: Juan">
-            </div>
-            <div class="form-group">
-                <label>Seleccionar Piloto/Coche:</label>
-                <select id="apostantePilot"></select>
-            </div>
-            <div class="form-group">
-                <label>Cantidad Apostada ($):</label>
-                <input type="number" id="apostanteAmount" min="1" placeholder="Ej: 50">
-            </div>
-            <button onclick="submitBet()">📩 Enviar Apuesta</button>
-        </div>
+        <!-- Bloque 4: Panel General y Reparto Proporcional -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="font-bold text-gray-800 text-lg flex items-center gap-2 mb-4">
+                <i class="fa-regular fa-clipboard text-amber-600"></i> Panel General de Apuestas y Reparto de Premios
+            </h2>
 
-        <!-- GANADOR -->
-        <div class="card">
-            <h3>🏆 Definir Ganador de la Carrera</h3>
-            <div class="form-group">
-                <label>¿Quién ganó la carrera?</label>
-                <select id="winnerSelect" onchange="setWinner(this.value)">
-                    <option value="">-- Seleccionar Ganador --</option>
-                </select>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="text-gray-500 font-semibold border-b border-gray-100">
+                            <th class="pb-3">Apostante</th>
+                            <th class="pb-3">Piloto Elegido</th>
+                            <th class="pb-3">Cantidad Jugada</th>
+                            <th class="pb-3">¿Acertó?</th>
+                            <th class="pb-3">% del Premio</th>
+                            <th class="pb-3">Premio a Pagar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaApuestas">
+                        <tr id="filaVacia">
+                            <td colspan="6" class="text-center text-gray-400 py-8">No hay apuestas registradas en esta carrera.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin-top: 15px;">
-                <p><strong>Bote Total Recaudado:</strong> $<span id="statTotal">0.00</span></p>
-                <p><strong>Comisión Casa (10%):</strong> $<span id="statHouse">0.00</span></p>
-                <p style="color: var(--success); font-weight: bold;"><strong>Bote Neto a Repartir:</strong> $<span id="statNet">0.00</span></p>
+            
+            <div class="flex justify-end mt-4">
+                <button onclick="reiniciarTodo()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-600 font-semibold px-3 py-1.5 rounded transition-colors">
+                    Reiniciar Limpiar Todo
+                </button>
             </div>
         </div>
+
     </div>
 
-    <!-- TABLA -->
-    <div class="card">
-        <h3>📋 Registro de Apuestas de la Carrera</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Apostante</th>
-                    <th>Elección</th>
-                    <th>Cantidad</th>
-                    <th>¿Acertó?</th>
-                    <th>Premio a Pagar</th>
-                </tr>
-            </thead>
-            <tbody id="betsTableBody"></tbody>
-        </table>
-    </div>
-</div>
+    <!-- Motor JavaScript de la Aplicación -->
+    <script>
+        let pilotos = [];
+        let apuestas = [];
+        let ganador = "";
 
-<script>
-    // ==========================================
-    // CAMBIA ESTO POR LA URL COMPLETA DE TU BASE DE DATOS DE FIREBASE:
-    const DATABASE_URL = "https://apuestas-carreras-default-rtdb.firebaseio.com/"; 
-    // ==========================================
+        window.onload = function() {
+            renderizarCamposPilotos();
+        }
 
-    let currentRace = "carrera_1";
-    let pilotsList = ["Piloto 1", "Piloto 2", "Piloto 3", "Piloto 4"];
-    let betsData = {};
+        document.getElementById('numPilotos').addEventListener('input', renderizarCamposPilotos);
 
-    function cleanURL(url) {
-        if (!url) return "";
-        let clean = url.trim();
-        if (!clean.endsWith("/")) clean += "/";
-        return clean;
-    }
+        function renderizarCamposPilotos() {
+            const num = parseInt(document.getElementById('numPilotos').value) || 4;
+            const contenedor = document.getElementById('contenedorPilotos');
+            contenedor.innerHTML = '';
+            
+            for(let i = 1; i <= num; i++) {
+                contenedor.innerHTML += `
+                    <span class="bg-gray-100 border border-gray-300 text-gray-700 text-xs px-3 py-1 rounded shadow-sm">Piloto ${i}</span>
+                `;
+            }
+        }
 
-    function request(method, path, data = null) {
-        return new Promise((resolve) => {
-            const baseUrl = cleanURL(DATABASE_URL);
-            const xhr = new XMLHttpRequest();
-            xhr.open(method, `${baseUrl}${path}.json`, true);
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try { resolve(JSON.parse(xhr.responseText)); } catch(e) { resolve(null); }
-                } else { resolve(null); }
-            };
-            xhr.onerror = function() { resolve(null); };
-            if (data) { xhr.send(JSON.stringify(data)); } else { xhr.send(); }
-        });
-    }
+        function guardarConfiguracion() {
+            const num = parseInt(document.getElementById('numPilotos').value) || 4;
+            pilotos = [];
+            for(let i = 1; i <= num; i++) {
+                pilotos.push(`Piloto ${i}`);
+            }
 
-    async function inicializar() {
-        generatePilotInputs();
-        await syncRacesList();
-        await syncCurrentRaceData();
-        setInterval(syncCurrentRaceData, 3000);
-    }
-
-    async function syncRacesList() {
-        const data = await request("GET", "lista_carreras");
-        const select = document.getElementById("raceSelect");
-        select.innerHTML = "";
-        if(data) {
-            Object.keys(data).forEach(r => {
-                let opt = document.createElement("option");
-                opt.value = r; opt.textContent = r.replace("_", " ").toUpperCase();
-                if(r === currentRace) opt.selected = true;
-                select.appendChild(opt);
+            // Actualizar select de apuestas
+            const selectPiloto = document.getElementById('selectPiloto');
+            selectPiloto.innerHTML = '<option value="">-- Elige un coche --</option>';
+            pilotos.forEach(p => {
+                selectPiloto.innerHTML += `<option value="${p}">${p}</option>`;
             });
-        } else {
-            await request("PUT", "lista_carreras/carrera_1", true);
-            select.innerHTML = '<option value="carrera_1">CARRERA 1</option>';
-        }
-    }
 
-    async function addRace() {
-        const res = await request("GET", "lista_carreras");
-        let count = res ? Object.keys(res).length + 1 : 1;
-        let newKey = `carrera_${count}`;
-        await request("PUT", `lista_carreras/${newKey}`, true);
-        currentRace = newKey;
-        await syncRacesList();
-        await syncCurrentRaceData();
-    }
-
-    async function changeRace() {
-        currentRace = document.getElementById("raceSelect").value;
-        await syncCurrentRaceData();
-    }
-
-    function generatePilotInputs() {
-        const num = parseInt(document.getElementById("numPilots").value) || 4;
-        const container = document.getElementById("pilotContainer");
-        if (container.children.length === num) return;
-        container.innerHTML = "";
-        for(let i=1; i<=num; i++) {
-            let input = document.createElement("input");
-            input.type = "text"; input.id = `pInp_${i}`;
-            input.value = pilotsList[i-1] || `Piloto ${i}`;
-            container.appendChild(input);
-        }
-    }
-
-    async function savePilots() {
-        const num = parseInt(document.getElementById("numPilots").value) || 4;
-        let newList = [];
-        for(let i=1; i<=num; i++) {
-            let val = document.getElementById(`pInp_${i}`).value.trim();
-            newList.push(val || `Piloto ${i}`);
-        }
-        await request("PUT", `carreras/${currentRace}/pilotos`, newList);
-        await syncCurrentRaceData();
-    }
-
-    async function submitBet() {
-        const name = document.getElementById("apostanteName").value.trim();
-        const pilot = document.getElementById("apostantePilot").value;
-        const amount = parseFloat(document.getElementById("apostanteAmount").value);
-        if(!name || !pilot || isNaN(amount) || amount <= 0) { alert("Completa todos los campos correctamente."); return; }
-        let betId = "bet_" + Date.now();
+            // Actualizar select de ganador
+            const selectGanador = document.getElementById('selectGanador');
+Usa el código con precaución.selectGanador.innerHTML = '-- Carrera en curso (Sin ganador) --';pilotos.forEach(p => {selectGanador.innerHTML += <option value="${p}">${p}</option>;});alert('¡Configuración de competidores fijada con éxito!');}function registrarApuesta() {const nombre = document.getElementById('nombreApostante').value.trim();const coche = document.getElementById('selectPiloto').value;const dinero = parseFloat(document.getElementById('dineroApostar').value);if(!nombre || !coche || isNaN(dinero) || dinero <= 0) {alert('Por favor, rellena todos los campos de la apuesta correctamente.');return;}apuestas.push({ nombre, coche, dinero });// Limpieza del formulario de registrodocument.getElementById('nombreApostante').value = '';document.getElementById('selectPiloto').value = '';document.getElementById('dineroApostar').value = '';actualizarContabilidad();actualizarTabla();}function actualizarContabilidad() {let totalBruto = 0;apuestas.forEach(a => totalBruto += a.dinero);let casa = totalBruto * 0.10; // Comisión de la Casa (10%)let neto = totalBruto - casa;  // Bote neto a repartirdocument.getElementById('boteTotal').innerText = $${totalBruto.toFixed(2)};document.getElementById('boteCasa').innerText = $${casa.toFixed(2)};document.getElementById('boteNeto').innerText = $${neto.toFixed(2)};}function definirGanador() {ganador = document.getElementById('selectGanador').value;actualizarTabla();}function actualizarTabla() {const tbody = document.getElementById('tablaApuestas');tbody.innerHTML = '';if (apuestas.length === 0) {tbody.innerHTML =  <tr id="filaVacia"> <td colspan="6" class="text-center text-gray-400 py-8">No hay apuestas registradas en esta carrera.</td> </tr>;return;}// Calcular cuánto dinero total se apostó exclusivamente al piloto ganadorlet totalApostadoAlGanador = 0;if (ganador) {apuestas.forEach(a => {if (a.coche === ganador) totalApostadoAlGanador += a.dinero;});}let totalBote = 0;apuestas.forEach(a => totalBote += a.dinero);let boteNetoAPartir = totalBote * 0.90;apuestas.forEach(a => {let acerto = "-";let porcentaje = "0.00%";let premio = "$0.00";if (ganador) {if (a.coche === ganador) {acerto = 'Sí';// Cálculo proporcional matemáticolet pct = a.dinero / totalApostadoAlGanador;porcentaje = ${(pct * 100).toFixed(2)}%;premio = $${(pct * boteNetoAPartir).toFixed(2)};} else {acerto = 'No';}}tbody.innerHTML += <tr class="border-b border-gray-100 text-gray-700 hover:bg-slate-50 transition-colors"> <td class="py-3">${a.nombre}</td> <td class="py-3">${a.coche}</td> <td class="py-3 font-medium">$${a.dinero.toFixed(2)}</td> <td class="py-3">${acerto}</td> <td class="py-3 text-gray-500">${porcentaje}</td> <td class="py-3 font-bold text-emerald-600">${premio}</td> </tr>;});}function reiniciarTodo() {if(confirm('¿Seguro que deseas vaciar todas las apuestas y reiniciar la carrera actual?')) {apuestas = [];ganador = "";document.getElementById('selectGanador').value = "";actualizarContabilidad();actualizarTabla();}}
